@@ -1,0 +1,2 @@
+colorama==0.3.9
+dpkt_fix==1.7
