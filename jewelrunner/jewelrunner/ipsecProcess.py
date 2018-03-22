@@ -420,7 +420,7 @@ def ipsecgenFilt(targetIp, threads):
                 + "-D unconfirmed  \n")
             rulesFile.write("\n")
             rulesCounter = rulesCounter + 1
-        elif entry[-2] == 'tcp' and entry[2] == targetIp:
+        elif entry[-2] == 'tcp' and entry[1] == targetIp:
             rulesFile.write("# [-] " + "PORT " + str(entry[2]) + "\n")
             rulesFile.write( #IN
                 "$GENFILT -v 4 -a P -s " + entry[0] + " -d " + entry[1] + " -g N -c tcp -o gt -p 1023 " \
@@ -470,7 +470,7 @@ def ipsecgenFilt(targetIp, threads):
                 + "-D unconfirmed  \n")
             rulesFile.write("\n")
             rulesCounter = rulesCounter + 1
-        elif entry[-2] == 'udp' and entry[2] == targetIp:
+        elif entry[-2] == 'udp' and entry[1] == targetIp:
             rulesFile.write("# [-] " + "PORT " + str(entry[2]) + "\n")
             rulesFile.write( #IN
                 "$GENFILT -v 4 -a P -s " + entry[0] + " -d " + entry[1] + " -g N -c udp -o gt -p 1023 " \
