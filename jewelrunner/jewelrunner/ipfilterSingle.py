@@ -12,8 +12,8 @@
 #            SunOS ATL050 5.10 Generic_150401 - 52         #
 #            IP Filter: v4.1.9 (592)                       #
 #                                                          #
-#     [*] 2018.03.05                                       #
-#          V0002                                           #
+#     [*] 2018.04.18                                       #
+#          V0003                                           #
 #          Black Lantern Security (BLS)                    #
 #          @pjhartlieb                                     #
 #                                                          #
@@ -96,7 +96,7 @@ def packetBucket(streams, targetHost, filterHost):
     return seeds
 
 
-def createRules(targetHost, filterHost, seeds):
+def createRules(targetHost, filterHost, seeds, outputFile):
     """
     Create rules statements based on unique conversations per protocol
 
@@ -110,7 +110,7 @@ def createRules(targetHost, filterHost, seeds):
     -------
     n/a
     """
-    rulesFile = open("/root/Desktop/ipFilter.txt", 'a')
+    rulesFile = open(outputFile, 'a')
     rulesCounter = 0
 
     for entry in seeds:
@@ -145,7 +145,7 @@ def createRules(targetHost, filterHost, seeds):
     print ""
 
 
-def base(streams, targetHost, filterHost):
+def base(streams, targetHost, filterHost, outputFile):
     """
     Parse log data
 
@@ -160,4 +160,4 @@ def base(streams, targetHost, filterHost):
     n/a
     """
     seeds = packetBucket(streams, targetHost, filterHost)
-    createRules(targetHost, filterHost, seeds)
+    createRules(targetHost, filterHost, seeds, outputFile)

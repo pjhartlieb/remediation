@@ -7,18 +7,18 @@
 #    [*] Route processing request                          #
 #                                                          #
 #                                                          #
-#    [*] 2018.03.05                                        #
-#          V0002                                           #
+#    [*] 2018.04.18                                        #
+#          V0003                                           #
 #          Black Lantern Security (BLS)                    #
 #          @pjhartlieb                                     #
 #                                                          #
 #                                                          #
 ############################################################
 
-from jewelrunner import ipfilterProcess, pcapProcess, ipsecProcess
+from jewelrunner import ipfilterProcess, pcapProcess, ipsecProcess, iptablesProcess
 
 
-def runner(ip, inputFile, inputType, inputFilter):
+def runner(ip, inputFile, inputType, inputFilter, outputFile):
     """
      Shuttle files and parameters for processing
 
@@ -26,8 +26,8 @@ def runner(ip, inputFile, inputType, inputFilter):
      ----------
      ip (string): target IP address being examined
      inputFilter (string): filter on conversations with IP for this IP address
-     inputFile (string): pcap or log file to be parsed
-     inputType (string): specify the input file type
+     inputFile (string): pcap or firewall log file to be parsed
+     inputType (string): specify the input file type (pcap, ipfilter, ipsec, iptables)
 
      Returns
      -------
@@ -39,7 +39,10 @@ def runner(ip, inputFile, inputType, inputFilter):
         pcapProcess.sortPcap(inputFile, ip, inputFilter)
 
     elif inputType == 'ipfilter':
-        ipfilterProcess.sortipFilter(inputFile, ip, inputFilter)
+        ipfilterProcess.sortipFilter(inputFile, ip, inputFilter, outputFile)
 
     elif inputType == 'ipsec':
-        ipsecProcess.sortipSec(inputFile, ip, inputFilter)
+        ipsecProcess.sortipSec(inputFile, ip, inputFilter, outputFile)
+
+    elif inputType == 'iptables':
+        iptablesProcess.sortipTables(inputFile, ip, inputFilter, outputFile)

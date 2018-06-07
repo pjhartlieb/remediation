@@ -12,8 +12,8 @@
 #            SunOS ATL050 5.10 Generic_150401 - 52         #
 #            IP Filter: v4.1.9 (592)                       #
 #                                                          #
-#     [*] 2018.03.05                                       #
-#          V0002                                           #
+#     [*] 2018.04.18                                       #
+#          V0003                                           #
 #          Black Lantern Security (BLS)                    #
 #          @pjhartlieb                                     #
 #                                                          #
@@ -296,7 +296,7 @@ def packetBucket(streams):
     #TCP/UDP
     for stream in streams:
         if stream[0] == "tcp":
-            if int(stream[4]) >= 50000 and int(stream[2]) >= 50000:
+            if int(stream[4]) >= 30000 and int(stream[2]) >= 30000:
                 highportWarnings.append(stream)
             elif (int(stream[2]) > int(stream[4])) and int(stream[2]) >= 1023:
                 srcIP = stream[1]
@@ -324,7 +324,7 @@ def packetBucket(streams):
                 streamOrphans.append(stream)
 
         elif stream[0] == "udp":
-            if int(stream[4]) >= 50000 and int(stream[2]) >= 50000:
+            if int(stream[4]) >= 30000 and int(stream[2]) >= 30000:
                 highportWarnings.append(stream)
             elif int(stream[2]) > int(stream[4]) and int(stream[2]) >= 1023:
                 srcIP = stream[1]
@@ -368,7 +368,7 @@ def packetBucket(streams):
     return seeds, streamOrphans, highportWarnings
 
 
-def createRules(target, threads):
+def createRules(target, threads, outputFile):
     """
     Create rules statements based on unique conversations per protocol
 
@@ -381,7 +381,7 @@ def createRules(target, threads):
     -------
     n/a
     """
-    rulesFile = open("/root/Desktop/ipFilter.txt", 'a')
+    rulesFile = open(outputFile, 'a')
     rulesCounter = 0
 
     for entry in threads:
@@ -463,7 +463,7 @@ def orphanSummary(streamOrphans, highportWarnings):
         print ""
 
 
-def sortipFilter(inputFile, ip, inputFilter):
+def sortipFilter(inputFile, ip, inputFilter, outputFile):
     """
     An ipfilter log  file will be processed in 1 of 2 ways. If there is both an ip for the target (ip) and an ip for a
     specific host (inputFilter) then the log file will be parsed for conversations and rules will be created for these
@@ -497,9 +497,9 @@ def sortipFilter(inputFile, ip, inputFilter):
         print
         ""
         streams = preProc(dataEntries)
-        ipfilterSingle.base(streams, ip, inputFilter)
+        ipfilterSingle.base(streams, ip, inputFilter, outputFile)
     else:
         streams = preProc(dataEntries)
         seeds, streamOrphans, highportWarnings= packetBucket(streams)
-        createRules(ip, seeds)
+        createRules(ip, seeds, outputFile)
         orphanSummary(streamOrphans, highportWarnings)

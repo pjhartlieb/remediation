@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# ipsecFilter.py
+# ipsecProcess.py
 
 ############################################################
 #                                                          #
@@ -12,8 +12,8 @@
 #           AIX version 7100-04-04-1717                    #
 #           ipSec version bos.net.ipsec.rte 7.1.4.31       #
                                                            #
-#    [-] 2018.03.05                                        #
-#          V0002                                           #
+#    [-] 2018.04.18                                        #
+#          V0003                                           #
 #          Black Lantern Security (BLS)                    #
 #          @pjhartlieb                                     #
 #                                                          #
@@ -138,7 +138,7 @@ def is_valid_ipsec_log(ipsecFile):
         logtype=match.group(0)
 
     if srcIP and dstIP and logtype:
-        print(Fore.BLUE + '[' + Fore.WHITE + 'c' + Fore.BLUE + ']' + Fore.GREEN + ' Ipsec log file appears to be '
+        print(Fore.BLUE + '[' + Fore.WHITE + '-' + Fore.BLUE + ']' + Fore.GREEN + ' Ipsec log file appears to be '
                                                                                   'well-formed')
     else:
 
@@ -296,7 +296,7 @@ def packetBucket(streams):
     #This makes assumptions about the hosts role in the conversation based on port
     for stream in streams:
         if stream[0] == "tcp":
-            if int(stream[4]) >= 50000 and int(stream[2]) >= 50000:
+            if int(stream[4]) >= 30000 and int(stream[2]) >= 30000:
                 highportWarnings.append(stream)
             elif (int(stream[2]) > int(stream[4])) and int(stream[2]) >= 1023:
                 srcIP = stream[1]
@@ -327,7 +327,7 @@ def packetBucket(streams):
                 streamOrphans.append(stream)
 
         elif stream[0] == "udp":
-            if int(stream[4]) >= 50000 and int(stream[2]) >= 50000:
+            if int(stream[4]) >= 30000 and int(stream[2]) >= 30000:
                 highportWarnings.append(stream)
             elif int(stream[2]) > int(stream[4]) and int(stream[2]) >= 1023:
                 srcIP = stream[1]
@@ -377,7 +377,7 @@ def packetBucket(streams):
     return seeds, streamOrphans, highportWarnings
 
 
-def ipsecgenFilt(targetIp, threads):
+def ipsecgenFilt(targetIp, threads, outputFile):
     """
     Create GENFILT statements based on unique conversations per protocol
 
@@ -391,7 +391,7 @@ def ipsecgenFilt(targetIp, threads):
     n/a
     """
 
-    rulesFile = open("/root/Desktop/ipSec.txt", 'a')
+    rulesFile = open(outputFile, 'a')
     rulesCounter = 0
 
     for entry in threads:
@@ -420,7 +420,7 @@ def ipsecgenFilt(targetIp, threads):
                 + "-D unconfirmed  \n")
             rulesFile.write("\n")
             rulesCounter = rulesCounter + 1
-        elif entry[-2] == 'tcp' and entry[2] == targetIp:
+        elif entry[-2] == 'tcp' and entry[1] == targetIp:
             rulesFile.write("# [-] " + "PORT " + str(entry[2]) + "\n")
             rulesFile.write( #IN
                 "$GENFILT -v 4 -a P -s " + entry[0] + " -d " + entry[1] + " -g N -c tcp -o gt -p 1023 " \
@@ -470,7 +470,7 @@ def ipsecgenFilt(targetIp, threads):
                 + "-D unconfirmed  \n")
             rulesFile.write("\n")
             rulesCounter = rulesCounter + 1
-        elif entry[-2] == 'udp' and entry[2] == targetIp:
+        elif entry[-2] == 'udp' and entry[1] == targetIp:
             rulesFile.write("# [-] " + "PORT " + str(entry[2]) + "\n")
             rulesFile.write( #IN
                 "$GENFILT -v 4 -a P -s " + entry[0] + " -d " + entry[1] + " -g N -c udp -o gt -p 1023 " \
@@ -559,7 +559,7 @@ def orphanSummary(streamOrphans, highportWarnings):
         print ""
 
 
-def sortipSec(inputFile, ip, inputFilter):
+def sortipSec(inputFile, ip, inputFilter, outputFile):
     """
     An ipsec log  file will be processed in 1 of 2 ways. If there is both an ip for the target (ip) and an ip for a
     specific host (inputFilter) then the log file will be parsed for conversations and rules will be created for these
@@ -593,9 +593,9 @@ def sortipSec(inputFile, ip, inputFilter):
         print
         ""
         streams = preProc(dataEntries)
-        ipsecSingle.base(streams, ip, inputFilter)
+        ipsecSingle.base(streams, ip, inputFilter, outputFile)
     else:
         streams = preProc(dataEntries)
         seeds, streamOrphans, highportWarnings= packetBucket(streams)
-        ipsecgenFilt(ip, seeds)
+        ipsecgenFilt(ip, seeds, outputFile)
         orphanSummary(streamOrphans, highportWarnings)

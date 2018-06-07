@@ -11,8 +11,8 @@
 #                                                          #
 #    [*] Main                                              #
 #                                                          #
-#    [*] 2018.03.05                                        #
-#          V0007                                           #
+#    [*] 2018.04.18                                        #
+#          V0008                                           #
 #          Black Lantern Security (BLS)                    #
 #          @pjhartlieb                                     #
 #                                                          #
@@ -35,7 +35,7 @@
 2. Filter out passive ftp traffic
 3. Parse ipv6
 4. Handle broadcast traffic
-5. Add option for file output
+5. Add option for file output - DONE
 6. Add feature that will make recommendations to consolidate rules from single IPs to VLANs
 7. Add ephemeral cmd line switch to clean up ports
 8. Remove redundancies. Create module for utility functions.
@@ -48,6 +48,32 @@ import os
 import re
 from colorama import Fore
 from jewelrunner import flume
+
+def is_valid_location(parser, arg):
+    """
+    Check if arg file already exists. Verify that the target directory is valid.
+
+    Parameters
+    ----------
+    parser : argparse object
+    arg : str
+
+    Returns
+    -------
+    arg
+    """
+    dir_path = os.path.dirname(os.path.realpath(arg))
+    arg = os.path.abspath(arg)
+    if  not os.path.isdir(dir_path):
+        parser.error("The directory %s does not exist!" % dir_path)
+    elif os.path.isfile(arg):
+        parser.error("The file %s already exists!" % arg)
+    else:
+        print(Fore.BLUE + '[' + Fore.WHITE + '-' + Fore.BLUE + ']' + Fore.GREEN + ' Output will be'
+                                                                                  ' written to %s' %arg)
+        print
+        ""
+    return arg
 
 
 def is_valid_file(parser, arg):
@@ -67,7 +93,7 @@ def is_valid_file(parser, arg):
     if not os.path.exists(arg):
         parser.error("The file %s does not exist!" % arg)
     else:
-        print(Fore.BLUE + '[' + Fore.WHITE + 'c' + Fore.BLUE + ']' + Fore.GREEN + ' Input file exists')
+        print(Fore.BLUE + '[' + Fore.WHITE + '-' + Fore.BLUE + ']' + Fore.GREEN + ' Input file exists')
         print
         ""
         return arg
@@ -86,9 +112,9 @@ def is_valid_input(parser, arg):
     -------
     arg
     """
-    match = re.match('ipfilter|ipsec|pcap', arg)
+    match = re.match('ipfilter|ipsec|pcap|iptables', arg)
     if match:
-        print(Fore.BLUE + '[' + Fore.WHITE + 'c' + Fore.BLUE + ']' + Fore.GREEN + ' Input option is valid')
+        print(Fore.BLUE + '[' + Fore.WHITE + '-' + Fore.BLUE + ']' + Fore.GREEN + ' Input option is valid')
         print ""
         return arg
     else:
@@ -149,8 +175,8 @@ def get_args():
     requiredNamed.add_argument('-io', '--input',
                         dest="input",
                         type=lambda x: is_valid_input(parser, x),
-                        help='Input file type. pcap files ("pcap"), ipSec log files (ipsec), and '
-                             'ipFilter log files (ipfilter)',
+                        help='Input file type. pcap files ("pcap"), ipSec log files (ipsec), '
+                             'ipFilter log files (ipfilter), and ipTables log files (iptables)',
                         metavar='',
                         required=True)
     requiredNamed.add_argument('-target', '--targetHost',
@@ -166,6 +192,15 @@ def get_args():
                         help='Filter on this host IP address',
                         metavar='',
                         required=False)
+    optionalNamed.add_argument('-of', '--outputFile',
+                        dest="outputFile",
+                        type=lambda x: is_valid_location(parser, x),
+                        help='Write results to this file',
+                        metavar='',
+                        const='output.txt',
+                        default='output.txt',
+                        nargs='?',
+                        required=False)
 
     # Array for all arguments passed to script
     args = parser.parse_args()
@@ -174,12 +209,16 @@ def get_args():
     inputFile = args.filename
     inputType = args.input
     inputFilter = args.filterHost
+    if args.outputFile:
+        outputFile = args.outputFile
+    else:
+        outputFile="output.txt"
 
     # Return all variable values
-    return ip, inputFile, inputType, inputFilter
+    return ip, inputFile, inputType, inputFilter, outputFile
 
 
 if __name__ == '__main__':
     print ""
-    ip, inputFile, inputType, inputFilter = get_args()
-    flume.runner(ip, inputFile, inputType, inputFilter)
+    ip, inputFile, inputType, inputFilter, outputFile = get_args()
+    flume.runner(ip, inputFile, inputType, inputFilter, outputFile)

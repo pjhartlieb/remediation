@@ -59,14 +59,14 @@ Parse ipSec log for target IP 10.10.10.1, isolate entries for 10.10.10.2 and cre
 ## Assumptions and Caveats
 
 * I have tried to include references wherever I borrowed from others. If I have missed someone, it was unintentional, lest I incur the wrath of the squirrel man.
-* In retrospect I should have done this in Bro-Script. This is on my list. I'd also like to try using scapy to create and deploy the rules in real time as packets are read.
-* This code is in-efficient. Several functions are repeated in each module. Future work includes plans for the creation of a utility module to consolidate these functions.
-* The higher port is always assumed to be the initiator of the connection. This may not always be the case.
-* JewelRunner will not create rules for high-port (>50000) to high-port traffic. However, it will report these flows in the output.
+* In retrospect I should have done this in Bro-Script. This is on my list. I'd also like to try using scapy to create and deploy the rules in real time as packates are read.
+* This code is in-efficient. Several functions are repeated in each module. Future work includes plans for the creation of a utility module to consolidate these functions. 
+* The higher port is always assumed to be to initiator of the connection. This may not always be the case.
+* JewelRunner will not create rules for high-port (>50000) to high-port traffic. However, it will report these flows in the output. 
 * JewelRunner will not create rules for low-port (< 1023) to low-port traffic. However, it will report these flows in the output.
-* When an filter IP is specified, jewelRunner makes no assumptions about the source port (ie. > 1023) when creating the host-based firewall rules. Rules will be created using the source port specified in the log file. It is up to the user to generalize these rules later on.  
+* When a filter IP is specified, jewelRunner makes no assumptions about the source port (ie. > 1023) when creating the host-based firewall rules. Rules will be created using the source port specified in the log file. It is up to the user to generalize these rules later on.  
 * JewelRunner assumes that any traffic it sees is allowed. Any rules should be ultimately adjudicated by the application and product teams.
-* JewelRunner is intended to support "proof-of-concept" activities for micro-segmentation. There are several Enterprise tools that will do this far more effectively at the enterprise level (12 ,13)
+* JewerlRunner is intended to support "proof-of-concept" activities for microsegmentation. There are several Enterprise tools that will do this far more effectively at the enterprise level (12 ,13)
 
 ## Future Work
 

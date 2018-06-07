@@ -12,8 +12,8 @@
 #            SunOS ATL050 5.10 Generic_150401 - 52         #
 #            IP Filter: v4.1.9 (592)                       #
 #                                                          #
-#     [*] 2018.03.05                                       #
-#          V0002                                           #
+#     [*] 2018.04.18                                       #
+#          V0003                                           #
 #          Black Lantern Security (BLS)                    #
 #          @pjhartlieb                                     #
 #                                                          #
@@ -109,7 +109,7 @@ def packetBucket(streams, targetHost, filterHost):
     return seeds
 
 
-def ipsecgenFilt(targetHost, filterHost, seeds):
+def ipsecgenFilt(targetHost, filterHost, seeds, outputFile):
     """
     Create GENFILT statements based on unique conversations per protocol
 
@@ -124,7 +124,7 @@ def ipsecgenFilt(targetHost, filterHost, seeds):
     n/a
     """
 
-    rulesFile = open("/root/Desktop/ipSec.txt", 'a')
+    rulesFile = open(outputFile, 'a')
     rulesCounter = 0
 
     for entry in seeds:
@@ -212,7 +212,7 @@ def getKeyA(item):
     return item[2]
 
 
-def base(streams, targetHost, filterHost):
+def base(streams, targetHost, filterHost, outputFile):
     """
     Parse log data
 
@@ -227,4 +227,4 @@ def base(streams, targetHost, filterHost):
     n/arm ipS
     """
     seeds = packetBucket(streams, targetHost, filterHost)
-    ipsecgenFilt(targetHost, filterHost, seeds)
+    ipsecgenFilt(targetHost, filterHost, seeds, outputFile)
